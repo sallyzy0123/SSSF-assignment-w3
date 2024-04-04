@@ -1,7 +1,69 @@
-# TODO: create graphql schema for cat. Example type definitions:
-# Cat: id, cat_name, weight, birthdate, owner, location, filename
-# Location: type, coordinates
-# Coordinates: lat, lng
-# LocationInput: type, coordinates
-# Query: catById, cats, catsByArea, catsByOwner
-# Mutation: createCat, updateCat, deleteCat
+# TODO: create graphql schema for cat. Example type definitions: 
+# Cat: id, cat_name, weight, birthdate, owner, location, filename ✅
+# Location: type, coordinates ✅
+# Coordinates: lat, lng ✅
+# LocationInput: type, coordinates ✅
+# Query: catById, cats, catsByArea, catsByOwner ✅
+# Mutation: createCat, updateCat, deleteCat ✅
+scalar DateTime
+
+type Cat {
+    id: ID
+    cat_name: String
+    weight: Float
+    birthdate: DateTime
+    owner: ID
+    location: Location
+    filename: String
+}
+
+type Location {
+    type: GeoJSONPointType
+    coordinates: [Float]
+}
+
+enum GeoJSONPointType {
+    Point
+}
+
+type Query {
+    cats: [Cat]
+    catByID(id: ID!): Cat
+    catsByArea(location: LocationInput!): [Cat]
+    catsByOwner(owner: ID!): [Cat]
+}
+
+input CatInput {
+    cat_name: String!
+    weight: Float!
+    birthdate: DateTime!
+    owner: ID!
+    location: LocationInput!
+    filename: String!
+}
+
+input CatModifyInput {
+    cat_name: String
+    weight: Float
+    birthdate: DateTime
+    owner: ID
+    location: LocationInput
+    filename: String
+}
+
+input LocationInput {
+    type: GeoJSONPointType!
+    # Coordinates must be in format [lng, lat]
+    coordinates: [Float]!
+}
+
+type CatMessage {
+    message: String!
+    cat: Cat
+}
+
+type Mutation {
+    createCat(cat: CatInput!): CatMessage
+    updateCat(id: ID!, cat: CatModifyInput!): CatMessage
+    deleteCat(id: ID!): CatMessage
+}

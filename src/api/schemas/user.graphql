@@ -1,4 +1,35 @@
 # TODO: create graphql schema for User. Example type definitions:
-# User: id, user_name, email
-# Query: users, userById
-# Mutation: createUser, updateUser, deleteUser
+# User: id, user_name, email ✅
+# Query: users, userById ✅
+# Mutation: createUser, updateUser, deleteUser ✅
+type User {
+    id: ID
+    user_name: String
+    email: String
+}
+
+type Query {
+    users: [User]
+    userById(id: ID!): User
+}
+
+input UserInput {
+    user_name: String!
+    email: String!
+}
+
+input UserModifyInput {
+    user_name: String
+    email: String
+}
+
+type UserMessage {
+    message: String!
+    user: User
+}
+
+type Mutation {
+    createUser(input: UserInput!): UserMessage
+    updateUser(id: ID!, input: UserModifyInput!): UserMessage
+    deleteUser(id: ID!): UserMessage
+}
