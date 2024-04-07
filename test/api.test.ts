@@ -34,6 +34,7 @@ describe('Testing graphql api', () => {
     await mongoose.connection.close();
   });
 
+  // ✅
   // test not found
   it('responds with a not found message', async () => {
     await getNotFound(app);
@@ -46,21 +47,25 @@ describe('Testing graphql api', () => {
     email: randomstring.generate(9) + '@user.fi',
   };
 
+  // ✅
   it('should create a new user', async () => {
     user = await postUser(app, testUser);
   });
 
+  // ✅
   // test get all users
   it('should return array of users', async () => {
     await getUser(app);
   });
 
+  // ✅
   // test get single user
   it('should return single user', async () => {
     console.log('singleuser', user);
     await getSingleUser(app, user.id!);
   });
 
+  // ✅
   // test update user
   it('should update user', async () => {
     await putUser(app, user.id!);
@@ -135,6 +140,7 @@ describe('Testing graphql api', () => {
     await userDeleteCat(app, catID1);
   });
 
+  // ✅
   // test delete user based on id
   it('should delete current user', async () => {
     await deleteUser(app, user.id!);

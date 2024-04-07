@@ -2,4 +2,6 @@
 // to the client
 // data to send is described in UploadMessageResponse interface
 
-// export {catPost};
+const catPost = async () => {};
+
+export {catPost};

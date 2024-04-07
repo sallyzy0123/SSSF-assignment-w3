@@ -8,3 +8,13 @@
 // 2.1. createCat
 // 2.2. updateCat
 // 2.3. deleteCat
+import {Cat} from '../../interfaces/Cat';
+import catModel from '../models/catModel';
+
+export default {
+    Query: {
+        cats: async (): Promise<Cat[]> => {
+            return await catModel.find();
+        },
+    }
+}

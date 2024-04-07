@@ -13,23 +13,8 @@ type Query {
     userById(id: ID!): User
 }
 
-input UserInput {
-    user_name: String!
-    email: String!
-}
-
-input UserModifyInput {
-    user_name: String
-    email: String
-}
-
-type UserMessage {
-    message: String!
-    user: User
-}
-
 type Mutation {
-    createUser(input: UserInput!): UserMessage
-    updateUser(id: ID!, input: UserModifyInput!): UserMessage
-    deleteUser(id: ID!): UserMessage
+    createUser(user_name: String!, email: String!): User
+    updateUser(user_name: String, id: ID!): User
+    deleteUser(id: ID!): User
 }
