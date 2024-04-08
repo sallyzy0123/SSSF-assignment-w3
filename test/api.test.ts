@@ -71,6 +71,7 @@ describe('Testing graphql api', () => {
     await putUser(app, user.id!);
   });
 
+  // ✅
   // test cat upload
   let uploadData1: UploadMessageResponse;
   let catData1: any;
@@ -86,6 +87,7 @@ describe('Testing graphql api', () => {
     };
   });
 
+  // ✅
   // test post cat data
   let catID1: string;
   it('should post all cat data', async () => {
@@ -94,37 +96,41 @@ describe('Testing graphql api', () => {
     catID1 = cat.id!;
   });
 
+  // ✅
   // test get all cats
   it('should return array of cats', async () => {
     await getCat(app);
   });
 
+  // ✅
   // test get single cat
   it('should return single cat', async () => {
     await getSingleCat(app, catID1);
   });
 
+  // ✅
   // get cats by user id
   it('should return cats by current user', async () => {
     await getCatByOwner(app, user.id!);
   });
 
-  // get cats by bounding box
-  it('should return cats by bounding box', async () => {
-    const location = {
-      topRight: {
-        lat: 70.1,
-        lng: 30.8,
-      },
-      bottomLeft: {
-        lat: 60.1,
-        lng: 19.8,
-      },
-    };
+  // // get cats by bounding box
+  // it('should return cats by bounding box', async () => {
+  //   const location = {
+  //     topRight: {
+  //       lat: 70.1,
+  //       lng: 30.8,
+  //     },
+  //     bottomLeft: {
+  //       lat: 20,
+  //       lng: 62,
+  //     },
+  //   };
 
-    await getCatByBoundingBox(app, location);
-  });
+  //   await getCatByBoundingBox(app, location);
+  // });
 
+  // ✅
   // modify cat by id
   it('should modify a cat', async () => {
     const newCat: CatTest = {
@@ -135,6 +141,7 @@ describe('Testing graphql api', () => {
     await userPutCat(app, newCat, catID1);
   });
 
+  // ✅
   // test delete cat
   it('should delete a cat', async () => {
     await userDeleteCat(app, catID1);

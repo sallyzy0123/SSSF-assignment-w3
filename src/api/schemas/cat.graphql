@@ -12,7 +12,7 @@ type Cat {
     cat_name: String
     weight: Float
     birthdate: DateTime
-    owner: ID
+    owner: User
     location: Location
     filename: String
 }
@@ -28,27 +28,14 @@ enum GeoJSONPointType {
 
 type Query {
     cats: [Cat]
-    catByID(id: ID!): Cat
-    catsByArea(location: LocationInput!): [Cat]
-    catsByOwner(owner: ID!): [Cat]
+    catById(id: ID!): Cat
+    catsByArea(topRight: Coordinates!, bottomLeft: Coordinates!): [Cat]
+    catsByOwner(ownerId: ID!): [Cat]
 }
 
-input CatInput {
-    cat_name: String!
-    weight: Float!
-    birthdate: DateTime!
-    owner: ID!
-    location: LocationInput!
-    filename: String!
-}
-
-input CatModifyInput {
-    cat_name: String
-    weight: Float
-    birthdate: DateTime
-    owner: ID
-    location: LocationInput
-    filename: String
+input Coordinates {
+  latitude: Float!
+  longitude: Float!
 }
 
 input LocationInput {
@@ -57,13 +44,8 @@ input LocationInput {
     coordinates: [Float]!
 }
 
-type CatMessage {
-    message: String!
-    cat: Cat
-}
-
 type Mutation {
-    createCat(cat: CatInput!): CatMessage
-    updateCat(id: ID!, cat: CatModifyInput!): CatMessage
-    deleteCat(id: ID!): CatMessage
+    createCat(cat_name: String!, weight: Float!, birthdate: DateTime!, owner: ID!, location: LocationInput!, filename: String!): Cat
+    updateCat(id: ID!, cat_name: String, weight: Float, birthdate: DateTime): Cat
+    deleteCat(id: ID!): Cat
 }
