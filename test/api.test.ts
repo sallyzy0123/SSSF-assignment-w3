@@ -114,21 +114,22 @@ describe('Testing graphql api', () => {
     await getCatByOwner(app, user.id!);
   });
 
-  // // get cats by bounding box
-  // it('should return cats by bounding box', async () => {
-  //   const location = {
-  //     topRight: {
-  //       lat: 70.1,
-  //       lng: 30.8,
-  //     },
-  //     bottomLeft: {
-  //       lat: 20,
-  //       lng: 62,
-  //     },
-  //   };
+  // ✅
+  // get cats by bounding box
+  it('should return cats by bounding box', async () => {
+    const location = {
+      topRight: {
+        lat: 70.1,
+        lng: 30.8,
+      },
+      bottomLeft: {
+        lat: 20,
+        lng: 62,
+      },
+    };
 
-  //   await getCatByBoundingBox(app, location);
-  // });
+    await getCatByBoundingBox(app, location);
+  });
 
   // ✅
   // modify cat by id

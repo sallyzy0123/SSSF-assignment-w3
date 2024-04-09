@@ -13,15 +13,17 @@ import catModel from '../models/catModel';
 import {GraphQLError} from 'graphql';
 import UserResolver from './userResolver';
 import {User} from '../../interfaces/User';
+import {coordinates} from '../../interfaces/Location';
 
 export default {
     Query: {
-        cats: async (): Promise<Cat[]> => {
-            const cats = await catModel.find().populate('owner').exec();
+        cats: async () => {
+            const cats = await catModel.find();
+            console.log('cats', cats);
             return cats;
         },
         catById: async (_parent: undefined, args: {id: string}): Promise<Cat> => {
-            const cat = await catModel.findById(args.id).populate('owner').exec();
+            const cat = await catModel.findById(args.id);
             if (!cat) {
                 throw new GraphQLError('Cat not found', {
                     extensions: {code: '404'}
@@ -32,47 +34,20 @@ export default {
         catsByOwner: async (
             _parent: undefined, 
             args: {ownerId: string}
-            ): Promise<{
-                id: string; 
-                cat_name: string; 
-                weight: number; 
-                birthdate: Date; 
-                owner: {
-                    id: string;
-                    user_name: string;
-                    email: string;
-                }; 
-                location: {
-                    type: string; 
-                    coordinates: number[]
-                }; 
-                filename: string;
-            }[] | {message: string}> => {
+            ) => {
             const cats = await catModel.find({owner: args.ownerId})
                 .populate('owner')
                 .exec();
             if (cats.length === 0) {
                 return {message: 'No cat belongs to this owner'};
             }
-            return cats.map(cat => ({
-                id: cat._id.toString(),
-                cat_name: cat.cat_name,
-                weight: cat.weight,
-                birthdate: cat.birthdate,
-                owner: {
-                    id: cat.owner._id.toString(),
-                    user_name: (cat.owner as any).user_name,
-                    email: (cat.owner as any).email,
-                },
-                location: cat.location,
-                filename: cat.filename
-            }));
+            return cats;
         },
         catsByArea: async (
             _parent: undefined,
             args: {
-                topRight: { latitude: number; longitude: number };
-                bottomLeft:  { latitude: number; longitude: number };
+                topRight: coordinates,
+                bottomLeft:  coordinates
             }
         ): Promise<{
             cat_name: string; 
@@ -81,25 +56,20 @@ export default {
                 coordinates: number[]
             }
         }[] | {message: string}> => {
+            const rightCorner = [args.topRight.lat, args.topRight.lng];
+            const leftCorner = [args.bottomLeft.lat, args.bottomLeft.lng];
+
             const cats = await catModel.find({
                 location: {
                     $geoWithin: {
-                        $box: [
-                            [args.topRight.latitude, args.topRight.longitude],
-                            [args.bottomLeft.latitude, args.bottomLeft.longitude]
-                        ]
+                        $box: [leftCorner, rightCorner]
                     }
                 }
             }).populate('owner').exec();
-            // console.log('cats', cats);
             if (cats.length === 0) {
                 return {message: 'No cat found in this area'};
             }
-            // console.log(cats);
-            return cats.map(cat => ({
-                cat_name: cat.cat_name,
-                location: cat.location
-            }));
+            return cats;
         },
     },
     Mutation: {
@@ -116,38 +86,14 @@ export default {
                     coordinates: number[]
                 }
             }
-        ): Promise<{
-            id: string; 
-            cat_name: string; 
-            weight: number; 
-            birthdate: Date; 
-            owner: {
-                id: string;
-                user_name: string;
-                email: string;
-            }; 
-            location: {
-                type: string; 
-                coordinates: number[]
-            }; 
-            filename: string
-        } | {message: string}> => {
+        ) => {
             try {
                 const cat = await catModel.create(args);
                 if (!cat) {
                     return {message: 'Cat not added'};
                 }
-                const ownerDetails = await UserResolver.Query.userById(undefined, {id: args.owner});
-                if (!ownerDetails) {
-                    return {message: 'Owner not found'};
-                }
-                const { _id, cat_name, weight, birthdate, location, filename } = cat;
-                const owner = { 
-                    user_name: ownerDetails.user_name, 
-                    email: ownerDetails.email, 
-                    id: ownerDetails._id.toString()
-                };
-                return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
+                console.log('cat', cat);
+                return cat;
             } catch (error) {
                 throw new GraphQLError((error as Error).message, {
                     extensions: {
@@ -160,64 +106,22 @@ export default {
         updateCat: async (
             _parent: undefined,
             args: {id: string; cat_name: string; weight: number; birthdate: Date}
-        ): Promise<{
-            id: string; 
-            cat_name: string; 
-            weight: number; 
-            birthdate: Date; 
-            owner: {
-                id: string;
-                user_name: string;
-                email: string;
-            }; 
-            location: {
-                type: string; 
-                coordinates: number[]
-            }; 
-            filename: string
-        } | {message: string}> => {
+        ) => {
             const cat = await catModel.findByIdAndUpdate(args.id, args, {new: true}).populate('owner').exec();
             if (!cat) {
                 return {message: 'Cat not updated'};
             }
-            const { _id, cat_name, weight, birthdate, location, filename } = cat;
-            const owner = { 
-                user_name: (cat.owner as User).user_name, 
-                email: (cat.owner as User).email, 
-                id: (cat.owner as User)._id.toString()
-            };
-            return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
+            return cat;
         },
         deleteCat: async (
             _parent: undefined,
             args: {id: string}
-        ): Promise<{
-            id: string; 
-            cat_name: string; 
-            weight: number; 
-            birthdate: Date; 
-            owner: {
-                id: string;
-                user_name: string;
-                email: string;
-            }; 
-            location: {
-                type: string; 
-                coordinates: number[]
-            }; 
-            filename: string
-        } | {message: string}> => {
+        ) => {
             const cat = await catModel.findByIdAndDelete(args.id).populate('owner').exec();
             if (!cat) {
                 return {message: 'Cat not deleted'};
             }
-            const { _id, cat_name, weight, birthdate, location, filename } = cat;
-            const owner = { 
-                user_name: (cat.owner as User).user_name, 
-                email: (cat.owner as User).email, 
-                id: (cat.owner as User)._id.toString()
-            };
-            return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
+            return cat;
         },
     }
 }

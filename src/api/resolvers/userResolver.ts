@@ -7,11 +7,21 @@
 // 2.2. updateUser ✅
 // 2.3. deleteUser ✅
 
+import {Cat} from '../../interfaces/Cat';
 import {User} from '../../interfaces/User';
 import userModel from '../models/userModel';
 import {GraphQLError} from 'graphql';
 
 export default {
+    Cat: {
+        owner: async (parent: Cat): Promise<User> => {
+          const user = await userModel.findById(parent.owner);
+          if (!user) {
+            throw new Error('Owner not found');
+          }
+          return user;
+        },
+      },
     Query: {
         users: async (): Promise<User[]> => {
             return await userModel.find();

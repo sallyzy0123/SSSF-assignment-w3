@@ -34,8 +34,8 @@ type Query {
 }
 
 input Coordinates {
-  latitude: Float!
-  longitude: Float!
+  lat: Float
+  lng: Float
 }
 
 input LocationInput {
