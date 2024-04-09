@@ -18,7 +18,7 @@ export default {
         cats: async (): Promise<Cat[]> => {
             const cats = await catModel.find().populate('owner').exec();
             
-            console.log('cats: ', cats);
+            // console.log('cats: ', cats);
             return cats;
         },
         catById: async (_parent: undefined, args: {id: string}): Promise<Cat> => {
@@ -91,8 +91,8 @@ export default {
                         ]
                     }
                 }
-            });
-            console.log('cats', cats);
+            }).populate('owner').exec();
+            // console.log('cats', cats);
             if (cats.length === 0) {
                 return {message: 'No cat found in this area'};
             }
