@@ -16,10 +16,13 @@ import UserResolver from './userResolver';
 export default {
     Query: {
         cats: async (): Promise<Cat[]> => {
-            return await catModel.find();
+            const cats = await catModel.find().populate('owner').exec();
+            
+            console.log('cats: ', cats);
+            return cats;
         },
         catById: async (_parent: undefined, args: {id: string}): Promise<Cat> => {
-            const cat = await catModel.findById(args.id);
+            const cat = await catModel.findById(args.id).populate('owner').exec();
             if (!cat) {
                 throw new GraphQLError('Cat not found', {
                     extensions: {code: '404'}
