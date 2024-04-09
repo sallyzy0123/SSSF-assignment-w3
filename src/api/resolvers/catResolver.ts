@@ -12,13 +12,12 @@ import {Cat} from '../../interfaces/Cat';
 import catModel from '../models/catModel';
 import {GraphQLError} from 'graphql';
 import UserResolver from './userResolver';
+import {User} from '../../interfaces/User';
 
 export default {
     Query: {
         cats: async (): Promise<Cat[]> => {
             const cats = await catModel.find().populate('owner').exec();
-            
-            // console.log('cats: ', cats);
             return cats;
         },
         catById: async (_parent: undefined, args: {id: string}): Promise<Cat> => {
@@ -123,7 +122,9 @@ export default {
             weight: number; 
             birthdate: Date; 
             owner: {
-                user_name: string
+                id: string;
+                user_name: string;
+                email: string;
             }; 
             location: {
                 type: string; 
@@ -141,7 +142,11 @@ export default {
                     return {message: 'Owner not found'};
                 }
                 const { _id, cat_name, weight, birthdate, location, filename } = cat;
-                const owner = { user_name: ownerDetails.user_name };
+                const owner = { 
+                    user_name: ownerDetails.user_name, 
+                    email: ownerDetails.email, 
+                    id: ownerDetails._id.toString()
+                };
                 return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
             } catch (error) {
                 throw new GraphQLError((error as Error).message, {
@@ -156,27 +161,63 @@ export default {
             _parent: undefined,
             args: {id: string; cat_name: string; weight: number; birthdate: Date}
         ): Promise<{
-            birthdate: Date; 
+            id: string; 
             cat_name: string; 
-            weight: number
+            weight: number; 
+            birthdate: Date; 
+            owner: {
+                id: string;
+                user_name: string;
+                email: string;
+            }; 
+            location: {
+                type: string; 
+                coordinates: number[]
+            }; 
+            filename: string
         } | {message: string}> => {
-            const cat = await catModel.findByIdAndUpdate(args.id, args, {new: true});
+            const cat = await catModel.findByIdAndUpdate(args.id, args, {new: true}).populate('owner').exec();
             if (!cat) {
                 return {message: 'Cat not updated'};
             }
-            const { cat_name, weight, birthdate } = cat;
-            return { cat_name, weight, birthdate };
+            const { _id, cat_name, weight, birthdate, location, filename } = cat;
+            const owner = { 
+                user_name: (cat.owner as User).user_name, 
+                email: (cat.owner as User).email, 
+                id: (cat.owner as User)._id.toString()
+            };
+            return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
         },
         deleteCat: async (
             _parent: undefined,
             args: {id: string}
-        ): Promise<{id: string} | {message: string}> => {
-            const cat = await catModel.findByIdAndDelete(args.id);
+        ): Promise<{
+            id: string; 
+            cat_name: string; 
+            weight: number; 
+            birthdate: Date; 
+            owner: {
+                id: string;
+                user_name: string;
+                email: string;
+            }; 
+            location: {
+                type: string; 
+                coordinates: number[]
+            }; 
+            filename: string
+        } | {message: string}> => {
+            const cat = await catModel.findByIdAndDelete(args.id).populate('owner').exec();
             if (!cat) {
                 return {message: 'Cat not deleted'};
             }
-            const { _id } = cat;
-            return { id: _id.toString() };
+            const { _id, cat_name, weight, birthdate, location, filename } = cat;
+            const owner = { 
+                user_name: (cat.owner as User).user_name, 
+                email: (cat.owner as User).email, 
+                id: (cat.owner as User)._id.toString()
+            };
+            return { id: _id.toString(), cat_name, weight, birthdate, owner, location, filename };
         },
     }
 }
